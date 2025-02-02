@@ -31,7 +31,7 @@ fi
 # Fetch conversation and format output
 curl -s "${API_URL}/v1/${BEACON_ID}/conversations/${CONVERSATION_ID}" \
     -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" \
-    | jq '.' \
+    | jq -c -r '.threads[] | .body' \
     || {
         echo "Error: Failed to fetch conversation"
         exit 1
