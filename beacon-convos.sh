@@ -3,11 +3,7 @@
 # Script to fetch Beacon conversations using the Help Scout API
 # Usage: ./beacon-convos.sh <device_id>
 
-# Configuration
-API_URL="http://beacon-main-api.hs-stack.orb.local"
-#API_URL="https://beaconapi.helpscout.net"  # Production URL (commented out)
-EMAIL="cochee83@msn.com"
-BEACON_ID="62ff60a9-6b49-442a-86b3-225da3d63f7a"
+source .env
 
 # Validate input arguments
 if [ $# -eq 0 ]; then
