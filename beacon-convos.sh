@@ -21,11 +21,19 @@ if ! [[ $DEVICE_ID =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
     exit 1
 fi
 
-# Fetch conversations
+# Define column headers
+readonly HEADERS=("conversation" "first_thread_created_at" "last_thread_created_at" "subject")
+readonly FORMAT="%-15s\t%-25s\t%-25s\t%-25s\n"
+
+# Print headers
+printf "$FORMAT" "${HEADERS[@]}"
+
+# Fetch conversations and format output
 curl -s "${API_URL}/v1/${BEACON_ID}/conversations" \
     -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" \
     | jq -c -r '.items[] | [.id, .firstThread.createdAt, .lastThread.createdAt, .subject] | @tsv' \
     | sort -n -r \
+    | awk -v fmt="$FORMAT" -F'\t' '{printf fmt,$1,$2,$3,$4}' \
     || {
         echo "Error: Failed to fetch conversations"
         exit 1

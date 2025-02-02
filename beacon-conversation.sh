@@ -28,6 +28,13 @@ if ! [[ $CONVERSATION_ID =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+# Define column headers
+readonly HEADERS=("created_by" "created_at" "body")
+readonly FORMAT="%-15s\t%-25s\t%-25s\t\n"
+
+# Print headers
+printf "$FORMAT" "${HEADERS[@]}"
+
 # Fetch conversation and format output
 response=$(curl -s -S "${API_URL}/v1/${BEACON_ID}/conversations/${CONVERSATION_ID}" \
     -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" 2>&1)
@@ -38,8 +45,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "$response" | jq -c -r '.threads[] | [.createdBy.type, .createdAt, .body] | @tsv' || {
-    echo "Error: Failed to parse response"
-    echo "Response: $response"
-    exit 1
-}
+echo "$response" | jq -c -r '.threads[] | [.createdBy.type, .createdAt, .body] | @tsv' \
+    | awk -v fmt="$FORMAT" -F'\t' '{printf fmt,$1,$2,$3}' \
+    || {
+        echo "Error: Failed to parse response"
+        echo "Response: $response"
+        exit 1
+    }
