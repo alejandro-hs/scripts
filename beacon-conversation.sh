@@ -29,10 +29,17 @@ if ! [[ $CONVERSATION_ID =~ ^[0-9]+$ ]]; then
 fi
 
 # Fetch conversation and format output
-curl -s "${API_URL}/v1/${BEACON_ID}/conversations/${CONVERSATION_ID}" \
-    -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" \
-    | jq -c -r '.threads[] | .body' \
-    || {
-        echo "Error: Failed to fetch conversation"
-        exit 1
-    }
+response=$(curl -s -S "${API_URL}/v1/${BEACON_ID}/conversations/${CONVERSATION_ID}" \
+    -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" 2>&1)
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to fetch conversation"
+    echo "Curl error: $response"
+    exit 1
+fi
+
+echo "$response" | jq -c -r '.threads[] | [.createdBy.type, .createdAt, .body] | @tsv' || {
+    echo "Error: Failed to parse response"
+    echo "Response: $response"
+    exit 1
+}

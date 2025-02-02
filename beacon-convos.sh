@@ -24,7 +24,8 @@ fi
 # Fetch conversations
 curl -s "${API_URL}/v1/${BEACON_ID}/conversations" \
     -H "Authorization: Beacon Email=${EMAIL},DeviceId=${DEVICE_ID}" \
-    | jq -c -r '.items[] | [.id, .subject] | @tsv' \
+    | jq -c -r '.items[] | [.id, .firstThread.createdAt, .lastThread.createdAt, .subject] | @tsv' \
+    | sort -n -r \
     || {
         echo "Error: Failed to fetch conversations"
         exit 1
